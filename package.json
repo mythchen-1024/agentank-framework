@@ -1,0 +1,24 @@
+{
+  "name": "all-round-tank-framework",
+  "version": "0.1.0",
+  "description": "Open-source behavior-tree tank framework skeleton for AgenTank (structure only, no competitive strategy).",
+  "private": false,
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "node build-new.js --all-skills",
+    "build:one": "node build-new.js --skill teleport"
+  },
+  "optionalDependencies": {
+    "terser": "^5.36.0"
+  },
+  "keywords": [
+    "agentank",
+    "behavior-tree",
+    "tank",
+    "bot",
+    "framework"
+  ]
+}

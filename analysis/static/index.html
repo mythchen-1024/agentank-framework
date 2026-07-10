@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>对局分析仪表盘</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header class="header">
+    <h1>对局分析仪表盘</h1>
+    <div class="controls">
+      <label>分析批次
+        <select id="runSelect"></select>
+      </label>
+      <label>代码版本
+        <select id="filterCodeHash"><option value="">全部版本</option></select>
+      </label>
+      <label>对手 rank ≥
+        <input id="filterMinRank" type="number" min="0" placeholder="不限" style="width:5rem" title="排除 rank_score 低于此值的对手（未知强度保留）" />
+      </label>
+      <button id="btnRefresh" type="button">刷新</button>
+      <button id="btnDeleteRun" type="button" class="btn-danger" title="删除当前选中的分析批次">删除批次</button>
+    </div>
+  </header>
+  <div id="serverBanner" class="server-banner" hidden></div>
+
+  <section class="kpi-row" id="kpiRow">
+    <div class="kpi"><span class="kpi-label">总场次</span><span class="kpi-value" id="kpiTotal">-</span></div>
+    <div class="kpi"><span class="kpi-label">胜率</span><span class="kpi-value" id="kpiWr">-</span></div>
+    <div class="kpi"><span class="kpi-label">胜</span><span class="kpi-value" id="kpiW">-</span></div>
+    <div class="kpi"><span class="kpi-label">负</span><span class="kpi-value" id="kpiL">-</span></div>
+  </section>
+
+  <main class="grid">
+    <section class="panel panel-wide">
+      <h2>版本对比（按敌方技能胜率）</h2>
+      <div class="filter-row">
+        <select id="compareHashA"><option value="">版本 A</option></select>
+        <select id="compareHashB"><option value="">版本 B</option></select>
+        <button id="btnCompare" type="button">对比</button>
+      </div>
+      <div class="table-wrap table-compact">
+        <table id="versionCompareTable">
+          <thead><tr><th>敌技能</th><th>A 胜率</th><th>B 胜率</th><th>Δ</th><th>A 场次</th><th>B 场次</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel panel-wide">
+      <h2>技能矩阵（我方 × 敌方 胜率）</h2>
+      <div class="chart-wrap"><canvas id="matrixChart"></canvas></div>
+      <div id="matrixLegend" class="matrix-legend"></div>
+    </section>
+
+    <section class="panel">
+      <h2>对手难度榜</h2>
+      <div class="filter-row">
+        <select id="oppSort">
+          <option value="worst">最难打</option>
+          <option value="frequent">最常遇</option>
+        </select>
+        <input id="oppMinSamples" type="number" value="2" min="1" style="width:4rem" title="最少样本" />
+      </div>
+      <div class="chart-wrap"><canvas id="opponentChart"></canvas></div>
+    </section>
+
+    <section class="panel">
+      <h2>我方行为（胜 / 负）</h2>
+      <select id="behaviorSkill"></select>
+      <div class="chart-wrap"><canvas id="behaviorChart"></canvas></div>
+    </section>
+
+    <section class="panel">
+      <h2>敌方技能画像</h2>
+      <div class="chart-wrap"><canvas id="enemyChart"></canvas></div>
+    </section>
+
+    <section class="panel">
+      <h2>胜场战术分布</h2>
+      <div class="chart-wrap"><canvas id="winPatternChart"></canvas></div>
+    </section>
+
+    <section class="panel">
+      <h2>负场战术分布</h2>
+      <div class="chart-wrap"><canvas id="lossPatternChart"></canvas></div>
+    </section>
+
+    <section class="panel panel-wide">
+      <h2>负场归因矩阵</h2>
+      <div class="filter-row">
+        <select id="matrixMySkill"><option value="">全部我方技能</option></select>
+        <select id="matrixEnemySkill"><option value="">全部敌方技能</option></select>
+      </div>
+      <div class="chart-wrap"><canvas id="crossMatrixChart"></canvas></div>
+    </section>
+
+    <section class="panel">
+      <h2>负场终局原因</h2>
+      <div class="chart-wrap"><canvas id="resultReasonChart"></canvas></div>
+    </section>
+
+    <section class="panel">
+      <h2>Profile Gap 建议</h2>
+      <div class="table-wrap table-compact">
+        <table id="profileGapsTable">
+          <thead><tr><th>Gap 标签</th><th>建议改参</th><th>场次</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>负场 diagnosis Top</h2>
+      <div class="table-wrap table-compact">
+        <table id="diagnosisTable">
+          <thead><tr><th>诊断</th><th>敌技能</th><th>场次</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel panel-wide">
+      <h2>负场 × BT 层级（死亡/终局窗口实证 raw 优先）</h2>
+      <div class="chart-wrap"><canvas id="btLayerChart"></canvas></div>
+    </section>
+
+    <section class="panel panel-wide">
+      <h2>对局明细</h2>
+      <div class="filter-row">
+        <select id="filterSkill"><option value="">全部技能</option></select>
+        <select id="filterResult">
+          <option value="">全部结果</option>
+          <option value="1">胜</option>
+          <option value="0">负</option>
+        </select>
+        <input id="filterOpponent" type="text" placeholder="对手名搜索" />
+        <select id="filterEnemySkill"><option value="">全部敌技能</option></select>
+        <select id="filterResultReason">
+          <option value="">全部终局</option>
+          <option value="crashed">撞毁</option>
+          <option value="star">星星决胜</option>
+          <option value="runTime">超时运营</option>
+          <option value="tie">平局</option>
+        </select>
+        <select id="filterLossTactic"><option value="">全部负场战术</option></select>
+        <select id="filterHasBomb">
+          <option value="">全部对局</option>
+          <option value="1">仅含炸弹</option>
+          <option value="0">确定无炸弹</option>
+          <option value="unknown">未知（无 raw）</option>
+        </select>
+        <input id="filterGapTag" type="text" placeholder="Gap 标签" style="width:7rem" title="模糊匹配 profile_gap_tags" />
+        <input id="filterMatchId" type="text" placeholder="对局 ID (mat_)" style="width:9rem" />
+        <button id="btnFilter" type="button">筛选</button>
+      </div>
+      <div id="matchLoadError" class="match-error" hidden></div>
+      <div class="table-wrap">
+        <table id="matchTable">
+          <thead>
+            <tr>
+              <th>结果</th><th>技能</th><th>对手</th><th>敌技能</th>
+              <th>💣</th><th>终局</th><th>星星</th><th>负场战术</th><th>BT 层级</th>
+              <th>关键 event</th><th>Gap</th><th>版本</th><th>对局 ID</th><th>链接</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div id="timelineModal" class="modal" hidden>
+    <div class="modal-backdrop" id="timelineModalBackdrop"></div>
+    <div class="modal-panel">
+      <header class="modal-header">
+        <h3 id="timelineModalTitle">负场时序</h3>
+        <button type="button" id="timelineModalClose" class="modal-close" aria-label="关闭">×</button>
+      </header>
+      <div id="timelineModalMeta" class="modal-meta"></div>
+      <div id="replayViewerRoot" class="replay-viewer"></div>
+      <div id="timelineModalBody" class="timeline-body"></div>
+      <footer class="modal-footer">
+        <a id="timelineModalReplay" href="#" target="_blank" rel="noopener">打开平台回放</a>
+      </footer>
+    </div>
+  </div>
+
+  <script src="/static/replay-viewer.js?v=4"></script>
+  <script src="/static/app.js?v=13"></script>
+</body>
+</html>

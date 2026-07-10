@@ -1,0 +1,334 @@
+:root {
+  color-scheme: light dark;
+  --bg: #0f1419;
+  --panel: #1a2332;
+  --text: #e7ecf3;
+  --muted: #8b98a8;
+  --accent: #3b82f6;
+  --win: #22c55e;
+  --loss: #ef4444;
+  --border: #2d3a4d;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f4f6f9;
+    --panel: #fff;
+    --text: #1a2332;
+    --muted: #64748b;
+    --border: #e2e8f0;
+  }
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+}
+
+.header h1 { margin: 0; font-size: 1.25rem; }
+.controls { display: flex; gap: 0.75rem; align-items: center; }
+.controls select, .controls button, .filter-row select, .filter-row input, .filter-row button {
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+}
+
+.btn-danger {
+  border-color: var(--loss);
+  color: var(--loss);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.btn-danger:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.kpi-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+}
+
+.kpi {
+  flex: 1;
+  min-width: 100px;
+  padding: 0.75rem 1rem;
+  background: var(--panel);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.kpi-label { display: block; font-size: 0.75rem; color: var(--muted); }
+.kpi-value { font-size: 1.5rem; font-weight: 700; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 1rem;
+  padding: 0 1.5rem 2rem;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.panel-wide { grid-column: 1 / -1; }
+.panel h2 { margin: 0 0 0.75rem; font-size: 1rem; }
+
+.chart-wrap {
+  position: relative;
+  height: 280px;
+}
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.matrix-legend {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+th, td { padding: 0.4rem 0.5rem; text-align: left; border-bottom: 1px solid var(--border); }
+th { color: var(--muted); font-weight: 600; }
+.tag-w { color: var(--win); font-weight: 700; }
+.tag-l { color: var(--loss); font-weight: 700; }
+a { color: var(--accent); }
+
+.match-error {
+  color: var(--loss);
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+
+.server-banner {
+  margin: 0 1.5rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid var(--loss);
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--loss);
+  font-size: 0.85rem;
+}
+
+.chart-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+.table-compact table { font-size: 0.8rem; }
+.table-compact th, .table-compact td { padding: 0.3rem 0.4rem; }
+
+.link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: inherit;
+  text-align: left;
+}
+.link-btn:hover { text-decoration: underline; }
+
+/* 对局 ID：等宽小字，便于扫读与选中复制 */
+.match-id {
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 0.75rem;
+  color: var(--muted);
+  user-select: all;
+  white-space: nowrap;
+}
+
+.modal[hidden] { display: none; }
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+}
+.modal-panel {
+  position: relative;
+  width: min(1100px, 98vw);
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.modal-header h3 { margin: 0; font-size: 1rem; }
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.modal-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+}
+.modal-footer {
+  padding: 0.6rem 1rem;
+  border-top: 1px solid var(--border);
+}
+.timeline-body {
+  overflow: auto;
+  padding: 0.5rem 1rem 1rem;
+  flex: 1;
+}
+.timeline-row {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.timeline-row.timeline-anchor {
+  background: rgba(59, 130, 246, 0.12);
+}
+.tl-frame {
+  flex: 0 0 3rem;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.tl-lanes { flex: 1; display: flex; flex-direction: column; gap: 0.25rem; }
+.tl-lane {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+}
+.tl-lane-label {
+  flex: 0 0 4.5rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+.tl-item {
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+.tl-event .tl-item { border-color: rgba(34, 197, 94, 0.4); }
+.tl-behavior .tl-item { border-color: rgba(59, 130, 246, 0.4); }
+.tl-profile .tl-item { border-color: rgba(234, 179, 8, 0.4); }
+.tl-empty { color: var(--muted); }
+
+/* ── 地图帧回放查看器 ── */
+.replay-viewer {
+  border-bottom: 1px solid var(--border);
+  padding: 0.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+.rv-hint { color: var(--muted); font-size: 0.85rem; margin: 0.4rem 0; }
+.rv-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.rv-btn {
+  padding: 0.25rem 0.55rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.rv-btn:hover { border-color: var(--accent); }
+.rv-anchor-btn { color: var(--accent); }
+.rv-slider { flex: 1; min-width: 120px; max-width: 320px; }
+.rv-frame-label { font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+.rv-frame-input {
+  width: 3.5rem;
+  padding: 0.15rem 0.3rem;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.8rem;
+}
+.rv-canvas {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #141b26;
+}
+.rv-status { font-size: 0.8rem; color: var(--text); }
+.rv-notes { font-size: 0.78rem; color: var(--muted); min-height: 1.1em; text-align: center; }
+
+/* timeline 行与地图帧联动 */
+.timeline-row { cursor: pointer; }
+.timeline-row:hover { background: rgba(59, 130, 246, 0.06); }
+.timeline-row.timeline-current {
+  background: rgba(234, 179, 8, 0.14);
+  outline: 1px solid rgba(234, 179, 8, 0.45);
+}

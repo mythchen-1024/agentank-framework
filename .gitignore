@@ -1,0 +1,14 @@
+.idea
+node_modules/
+dist/
+.tmp/
+tmp/
+.cache/
+__pycache__/
+*.pyc
+.env
+analysis/data.db
+*.bak.js
+bt-tank-submit.js
+.DS_Store
+Thumbs.db

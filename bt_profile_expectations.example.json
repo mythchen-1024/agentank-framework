@@ -1,0 +1,36 @@
+{
+  "_comment": "复制为 bt_profile_expectations.json 或直接改该文件。空表时分析器仍入库，但不产出 profile_gap_tags。",
+  "skill_profiles": {
+    "overload": {
+      "standoffDistance": 6,
+      "starAggression": "low",
+      "enableAssassination": false
+    },
+    "teleport": {
+      "standoffDistance": 3,
+      "starAggression": "medium"
+    }
+  },
+  "tag_expectations": {
+    "aggressive": {
+      "standoffDistance_min": 5,
+      "dodge_priority": "high"
+    },
+    "enemy_star_rush": {
+      "starAggression": "low"
+    }
+  },
+  "gap_rules": {
+    "should_not_rush_star": {
+      "when_loss_tactic": ["star_greed", "star_race"],
+      "enemy_skills": ["cloak", "overload", "teleport"],
+      "enemy_tags": ["enemy_star_rush"],
+      "suggest_params": { "starAggression": "low" }
+    },
+    "should_dodge_more": {
+      "when_loss_tactic": ["dodge_fail"],
+      "enemy_tags": ["aggressive"],
+      "suggest_params": { "standoffDistance": "+1" }
+    }
+  }
+}
