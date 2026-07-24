@@ -1,5 +1,7 @@
 # agentank-framework
 
+**语言 / Languages：** **中文** | [English](README.en.md)
+
 面向 [AgenTank](https://agentank.ai) 的**行为树坦克框架骨架**（开源参考实现）。
 
 > **这是什么**：可构建、可发布、可分析的架构脚手架——根优先级、技能插槽、承诺机制、BT 日志、Terser 压缩与工具链。  
